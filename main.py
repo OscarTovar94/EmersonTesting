@@ -25,6 +25,7 @@ from tkinter import messagebox
 import win32event
 import win32api
 import winerror
+import threading
 
 
 # ---- Control de instancia única ----
@@ -434,7 +435,7 @@ class VentanaPrincipal:
             text=(
                 "En Espera"
             ),
-            font=("Arial",50, "bold"),
+            font=("Arial", 50, "bold"),
             text_color="#002060",
             bg_color="#A6C9EC",
         )
@@ -504,7 +505,6 @@ class VentanaPrincipal:
         if respuesta:
             self.root_login.destroy()
 
-    def iniciar_pruebas(self):
         """Ejecuta la secuencia de pruebas del modelo seleccionado."""
 
         try:
@@ -569,6 +569,50 @@ class VentanaPrincipal:
                 state="normal"
             )
 
+    def iniciar_pruebas(self):
+        """Prepara la interfaz e inicia las pruebas en segundo plano."""
+
+        configuracion = CONFIGURACION_MODELOS.get(self.modelo)
+
+        if configuracion is None:
+            messagebox.showerror(
+                "Error",
+                f"No existe configuración para el modelo: {self.modelo}"
+            )
+            return
+
+        # Evita presionar el botón varias veces
+        self.boton_iniciar.configure(
+            state="disabled"
+        )
+
+        # Limpia los resultados de la prueba anterior
+        for fila in self.filas_pruebas:
+            fila["valor"].configure(
+                text="---"
+            )
+
+            fila["estado"].configure(
+                text="PENDIENTE",
+                text_color="#D9A441"
+            )
+
+        self.label_status.configure(
+            text="EN PROCESO",
+            text_color="#A85D00",
+            bg_color="#FFF2CC"
+        )
+
+        # Permite que Tkinter dibuje los cambios
+        self.ventana.update_idletasks()
+
+        hilo_pruebas = threading.Thread(
+            target=self.ejecutar_secuencia_pruebas,
+            daemon=True
+        )
+
+        hilo_pruebas.start()
+
     def procesar_resultados(self, resultado):
         """Muestra los resultados en la tabla dinámica."""
 
@@ -624,13 +668,13 @@ class VentanaPrincipal:
                 text="PASS",
                 text_color="#006100",
                 bg_color="#C6EFCE"
-                )
+            )
         else:
             self.label_status.configure(
                 text="FAIL",
                 text_color="#9C0006",
                 bg_color="#FFC7CE"
-                )
+            )
 
     def crear_tabla_pruebas(self, pruebas):
         """Crea una fila por cada prueba del modelo cargado."""
@@ -755,17 +799,17 @@ class VentanaPrincipal:
             })
 
     def cargar_pruebas_modelo(self):
-        """Carga las pruebas del modelo y las muestra sin ejecutarlas."""
+        """Carga y muestra las pruebas del modelo seleccionado."""
 
         try:
-            configuracion = CONFIGURACION_MODELOS.get(self.modelo)
+            configuracion = CONFIGURACION_MODELOS.get(
+                self.modelo
+            )
 
             if configuracion is None:
-                messagebox.showerror(
-                    "Error",
+                raise ValueError(
                     f"No existe configuración para el modelo: {self.modelo}"
                 )
-                return
 
             nombre_archivo = configuracion["archivo"]
 
@@ -782,6 +826,64 @@ class VentanaPrincipal:
                 "Error",
                 f"No fue posible cargar las pruebas:\n\n{error}"
             )
+
+    def ejecutar_secuencia_pruebas(self):
+        """Ejecuta la secuencia sin bloquear la interfaz."""
+
+        try:
+            configuracion = CONFIGURACION_MODELOS[self.modelo]
+
+            nombre_clase = configuracion["clase"]
+
+            clase_prueba = getattr(
+                self.modulo_modelo,
+                nombre_clase
+            )
+
+            secuencia = clase_prueba()
+
+            resultado = secuencia.ejecutar_pruebas()
+
+            # La interfaz siempre debe actualizarse desde el hilo principal
+            self.ventana.after(
+                0,
+                lambda: self.finalizar_pruebas(resultado)
+            )
+
+        except Exception as error:
+            mensaje_error = str(error)
+
+            self.ventana.after(
+                0,
+                lambda: self.mostrar_error_pruebas(mensaje_error)
+            )
+
+    def finalizar_pruebas(self, resultado):
+        """Muestra los resultados y habilita nuevamente el botón."""
+
+        self.procesar_resultados(resultado)
+
+        self.boton_iniciar.configure(
+            state="normal"
+        )
+
+    def mostrar_error_pruebas(self, mensaje_error):
+        """Muestra un error ocurrido durante la secuencia."""
+
+        self.label_status.configure(
+            text="ERROR",
+            text_color="#FFFFFF",
+            bg_color="#D9534F"
+        )
+
+        self.boton_iniciar.configure(
+            state="normal"
+        )
+
+        messagebox.showerror(
+            "Error",
+            f"No fue posible ejecutar las pruebas:\n\n{mensaje_error}"
+        )
 
 
 def cargar_modulo_modelo(nombre_archivo):
