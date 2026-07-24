@@ -496,7 +496,6 @@ class VentanaPrincipal:
         self.root_login.lift()
         self.root_login.focus_force()
 
-    def cerrar_aplicacion(self):
         """Cierra completamente la aplicación."""
 
         respuesta = messagebox.askyesno(
@@ -570,6 +569,35 @@ class VentanaPrincipal:
             self.boton_iniciar.configure(
                 state="normal"
             )
+
+    def cerrar_aplicacion(self):
+        """Cierra completamente la aplicación."""
+
+        respuesta = messagebox.askyesno(
+            "Salir",
+            "¿Desea cerrar la aplicación Emerson?"
+        )
+
+        if not respuesta:
+            return
+
+        # Evita que callbacks pendientes intenten modificar la interfaz
+        self.cerrando = True
+
+        try:
+            self.ventana.quit()
+        except tk.TclError:
+            pass
+
+        try:
+            self.ventana.destroy()
+        except tk.TclError:
+            pass
+
+        try:
+            self.root_login.destroy()
+        except tk.TclError:
+            pass
 
     def iniciar_pruebas(self):
         """Prepara la interfaz e inicia las pruebas en segundo plano."""
@@ -833,11 +861,10 @@ class VentanaPrincipal:
             )
 
     def ejecutar_secuencia_pruebas(self):
-        """Ejecuta la secuencia sin bloquear la interfaz."""
+        """Ejecuta las pruebas sin bloquear la interfaz."""
 
         try:
             configuracion = CONFIGURACION_MODELOS[self.modelo]
-
             nombre_clase = configuracion["clase"]
 
             clase_prueba = getattr(
@@ -846,34 +873,57 @@ class VentanaPrincipal:
             )
 
             secuencia = clase_prueba()
-
             resultado = secuencia.ejecutar_pruebas()
 
-            # La interfaz siempre debe actualizarse desde el hilo principal
+            if self.cerrando:
+                return
+
             self.ventana.after(
                 0,
-                lambda: self.finalizar_pruebas(resultado)
+                lambda resultado=resultado:
+                self.finalizar_pruebas(resultado)
             )
 
         except Exception as error:
+            if self.cerrando:
+                return
+
             mensaje_error = str(error)
 
             self.ventana.after(
                 0,
-                lambda: self.mostrar_error_pruebas(mensaje_error)
+                lambda mensaje_error=mensaje_error:
+                self.mostrar_error_pruebas(mensaje_error)
             )
 
     def finalizar_pruebas(self, resultado):
-        """Muestra los resultados y habilita nuevamente el botón."""
+        """Finaliza la ejecución y actualiza la interfaz."""
+
+        if self.cerrando:
+            return
+
+        if not self.ventana.winfo_exists():
+            return
+
+        self.prueba_en_proceso = False
 
         self.procesar_resultados(resultado)
 
-        self.boton_iniciar.configure(
-            state="normal"
-        )
+        if self.boton_iniciar.winfo_exists():
+            self.boton_iniciar.configure(
+                state="normal"
+            )
 
     def mostrar_error_pruebas(self, mensaje_error):
-        """Muestra un error ocurrido durante la secuencia."""
+        """Muestra un error ocurrido durante las pruebas."""
+
+        if self.cerrando:
+            return
+
+        if not self.ventana.winfo_exists():
+            return
+
+        self.prueba_en_proceso = False
 
         self.label_status.configure(
             text="ERROR",
