@@ -9,8 +9,8 @@ PRUEBAS = [
         "nombre": "Test W1",
         "descripcion": "Medición de resistencia W1",
         "canal": 101,
-        "minimo": 0.0,
-        "maximo": 10.0,
+        "minimo": 800,
+        "maximo": 10000,
         "unidad": "Ω"
     },
     {
@@ -25,125 +25,8 @@ PRUEBAS = [
     {
         "numero": 3,
         "nombre": "Test W3",
-        "descripcion": "Medición de resistencia W3",
+        "descripcion": "Medición de resistencia W2",
         "canal": 103,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 4,
-        "nombre": "Test W4",
-        "descripcion": "Medición de resistencia W4",
-        "canal": 104,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 5,
-        "nombre": "Test W5",
-        "descripcion": "Medición de resistencia W5",
-        "canal": 105,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 6,
-        "nombre": "Test W6",
-        "descripcion": "Medición de resistencia W6",
-        "canal": 106,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 7,
-        "nombre": "Test W7",
-        "descripcion": "Medición de resistencia W7",
-        "canal": 107,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 8,
-        "nombre": "Test W8",
-        "descripcion": "Medición de resistencia W8",
-        "canal": 108,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 9,
-        "nombre": "Test W9",
-        "descripcion": "Medición de resistencia W9",
-        "canal": 109,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 10,
-        "nombre": "Test W10",
-        "descripcion": "Medición de resistencia W10",
-        "canal": 110,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 11,
-        "nombre": "Test W11",
-        "descripcion": "Medición de resistencia W11",
-        "canal": 111,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 12,
-        "nombre": "Test W12",
-        "descripcion": "Medición de resistencia W12",
-        "canal": 112,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 13,
-        "nombre": "Test W13",
-        "descripcion": "Medición de resistencia W13",
-        "canal": 113,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 14,
-        "nombre": "Test W14",
-        "descripcion": "Medición de resistencia W14",
-        "canal": 114,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 15,
-        "nombre": "Test W15",
-        "descripcion": "Medición de resistencia W15",
-        "canal": 115,
-        "minimo": 0.0,
-        "maximo": 10.0,
-        "unidad": "Ω"
-    },
-    {
-        "numero": 16,
-        "nombre": "Test W16",
-        "descripcion": "Medición de resistencia W16",
-        "canal": 116,
         "minimo": 0.0,
         "maximo": 10.0,
         "unidad": "Ω"

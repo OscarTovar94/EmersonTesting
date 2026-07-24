@@ -101,7 +101,7 @@ class VentanaLogin:
         self.root.bind("<Return>", self.entrar)
 
         # Coloca el cursor en el primer campo
-        self.entry_empleado.focus_set()
+        #self.entry_empleado.focus_set()
 
     def configurar_ventana(self):
         """Centra la ventana en la pantalla."""
@@ -185,6 +185,7 @@ class VentanaLogin:
             padx=55,
             pady=(0, 18)
         )
+        
 
         # Número de orden
         self.label_orden = ctk.CTkLabel(
@@ -254,6 +255,8 @@ class VentanaLogin:
             padx=55,
             pady=(0, 25)
         )
+
+        self.entry_empleado.focus_set()
 
     def validar_datos(self):
         """Valida los datos capturados por el operador."""
@@ -422,7 +425,8 @@ class VentanaPrincipal:
 
         self.frame_tabla = ctk.CTkScrollableFrame(
             self.frame_contenido,
-            label_text="Resultados de pruebas"
+            label_text="Resultados de pruebas",
+            #fg_color="transparent"
         )
 
         self.frame_tabla.pack(
@@ -442,6 +446,8 @@ class VentanaPrincipal:
             bg_color="#A6C9EC",
         )
         self.label_status.pack(
+            fill="x",
+            padx=20,
             pady=10
         )
 
@@ -457,118 +463,6 @@ class VentanaPrincipal:
         self.boton_iniciar.pack(
             pady=20
         )
-
-        self.boton_cerrar_sesion = ctk.CTkButton(
-            self.frame_contenido,
-            text="Cerrar sesión",
-            command=self.cerrar_sesion,
-            width=180,
-            height=42,
-            font=("Arial", 15, "bold"),
-            fg_color="#A33A3A",
-            hover_color="#7F2D2D"
-        )
-        self.boton_cerrar_sesion.pack(
-            pady=20
-        )
-
-    def cerrar_sesion(self):
-        """Cierra la ventana principal y regresa al Login."""
-
-        self.label_status.configure(
-            text="En Espera",
-            text_color="#002060",
-            bg_color="#A6C9EC"
-        )
-
-        respuesta = messagebox.askyesno(
-            "Cerrar sesión",
-            "¿Desea regresar a la ventana de Login?"
-        )
-
-        if not respuesta:
-            return
-
-        self.ventana.destroy()
-
-        # Limpia algunos datos del Login
-        self.root_login.deiconify()
-        self.root_login.lift()
-        self.root_login.focus_force()
-
-        """Cierra completamente la aplicación."""
-
-        respuesta = messagebox.askyesno(
-            "Salir",
-            "¿Desea cerrar la aplicación Emerson?"
-        )
-
-        if respuesta:
-            self.root_login.destroy()
-
-        """Ejecuta la secuencia de pruebas del modelo seleccionado."""
-
-        try:
-            configuracion = CONFIGURACION_MODELOS.get(
-                self.modelo
-            )
-
-            if configuracion is None:
-                messagebox.showerror(
-                    "Error",
-                    f"No existe configuración para el modelo: {self.modelo}"
-                )
-                return
-
-            nombre_clase = configuracion["clase"]
-
-            # Reinicia visualmente las filas
-            for fila in self.filas_pruebas:
-                fila["valor"].configure(
-                    text="---"
-                )
-
-                fila["estado"].configure(
-                    text="PENDIENTE",
-                    text_color="#9C5700"
-                )
-
-            self.label_status.configure(
-                text="En Proceso",
-                text_color="#9C5700",
-                bg_color="#FFEB9C"
-            )
-
-            self.boton_iniciar.configure(
-                state="disabled"
-            )
-
-            # Fuerza a Tkinter a dibujar los cambios antes de medir
-            self.ventana.update_idletasks()
-
-            clase_prueba = getattr(
-                self.modulo_modelo,
-                nombre_clase
-            )
-
-            secuencia = clase_prueba()
-
-            resultado = secuencia.ejecutar_pruebas()
-
-            self.procesar_resultados(
-                resultado
-            )
-
-        except Exception as error:
-            messagebox.showerror(
-                "Error",
-                f"No fue posible ejecutar las pruebas:\n\n{error}"
-            )
-
-        finally:
-            self.boton_iniciar.configure(
-                state="normal"
-            )
 
     def cerrar_aplicacion(self):
         """Cierra completamente la aplicación."""
