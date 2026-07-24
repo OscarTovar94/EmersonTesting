@@ -22,6 +22,22 @@ import os
 import sys
 import importlib.util
 from tkinter import messagebox
+import win32event
+import win32api
+import winerror
+
+
+# ---- Control de instancia única ----
+MUTEX_NAME = "main"
+
+mutex = win32event.CreateMutex(
+    None,
+    False,
+    MUTEX_NAME
+)
+
+if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
+    sys.exit(0)
 
 
 ctk.set_appearance_mode("dark")
@@ -55,6 +71,7 @@ CONFIGURACION_MODELOS = {
     }
 }
 
+
 def obtener_ruta_base():
     """
     Obtiene la carpeta donde se encuentra el ejecutable
@@ -65,6 +82,7 @@ def obtener_ruta_base():
         return os.path.dirname(sys.executable)
 
     return os.path.dirname(os.path.abspath(__file__))
+
 
 class VentanaLogin:
     """Ventana de inicio de sesión de la aplicación Emerson."""
@@ -304,6 +322,7 @@ class VentanaLogin:
             root_login=self.root,
             datos_login=datos_login
         )
+
 
 class VentanaPrincipal:
     """Ventana principal de la aplicación Emerson."""
@@ -578,6 +597,7 @@ class VentanaPrincipal:
                 "Resultado final: FAIL"
             )
 
+
 def cargar_modulo_modelo(nombre_archivo):
     """
     Carga dinámicamente un archivo Python ubicado
@@ -614,6 +634,7 @@ def cargar_modulo_modelo(nombre_archivo):
     spec.loader.exec_module(modulo)
 
     return modulo
+
 
 if __name__ == "__main__":
     root = ctk.CTk()
