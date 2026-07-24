@@ -381,8 +381,8 @@ class VentanaPrincipal:
         )
 
         texto_informacion = (
-            f"Empleado: {self.datos_login['empleado']}    |    "
-            f"Orden: {self.datos_login['orden']}    |    "
+            f"#Empleado: {self.datos_login['empleado']}    |    "
+            f"#Orden: {self.datos_login['orden']}    |    "
             f"Modelo: {self.datos_login['modelo']}"
         )
 
@@ -411,7 +411,7 @@ class VentanaPrincipal:
 
         self.label_modelo = ctk.CTkLabel(
             self.frame_contenido,
-            text=f"Configuración cargada: {self.datos_login['modelo']}",
+            text=f"{self.datos_login['modelo']}",
             font=("Arial", 24, "bold")
         )
         self.label_modelo.pack(
@@ -421,8 +421,7 @@ class VentanaPrincipal:
         self.label_mensaje = ctk.CTkLabel(
             self.frame_contenido,
             text=(
-                "En esta sección se cargará la secuencia de pruebas "
-                "correspondiente al modelo seleccionado."
+                "Secuencia de pruebas"
             ),
             font=("Arial", 17),
             text_color="#AEB4C8"
@@ -431,19 +430,20 @@ class VentanaPrincipal:
             pady=10
         )
 
-        self.boton_cerrar_sesion = ctk.CTkButton(
+        self.label_status = ctk.CTkLabel(
             self.frame_contenido,
-            text="Cerrar sesión",
-            command=self.cerrar_sesion,
-            width=180,
-            height=42,
-            font=("Arial", 15, "bold"),
-            fg_color="#A33A3A",
-            hover_color="#7F2D2D"
+            text=(
+                "En Espera"
+            ),
+            font=("Arial", 60, "bold"),
+            text_color="#002060",
+            bg_color="#A6C9EC",
+            width=200
         )
-        self.boton_cerrar_sesion.pack(
-            pady=40
+        self.label_status.pack(
+            pady = 50
         )
+
 
         self.boton_iniciar = ctk.CTkButton(
             self.frame_contenido,
@@ -458,8 +458,28 @@ class VentanaPrincipal:
             pady=30
         )
 
+        self.boton_cerrar_sesion = ctk.CTkButton(
+                    self.frame_contenido,
+                    text="Cerrar sesión",
+                    command=self.cerrar_sesion,
+                    width=180,
+                    height=42,
+                    font=("Arial", 15, "bold"),
+                    fg_color="#A33A3A",
+                    hover_color="#7F2D2D"
+                )
+        self.boton_cerrar_sesion.pack(
+            pady=40
+            )
+
     def cerrar_sesion(self):
         """Cierra la ventana principal y regresa al Login."""
+
+        self.label_status.configure(
+            text= "En Espera",
+            text_color="#002060",
+            bg_color="#A6C9EC"
+            )
 
         respuesta = messagebox.askyesno(
             "Cerrar sesión",
@@ -503,6 +523,12 @@ class VentanaPrincipal:
                 f"{modelo_seleccionado}"
             )
             return
+
+        self.label_status.configure(
+            text= "EN PROCESO",
+            text_color="#9C5700",
+            bg_color="#FFEB9C"
+            )
 
         nombre_archivo = configuracion["archivo"]
         nombre_clase = configuracion["clase"]
@@ -584,18 +610,18 @@ class VentanaPrincipal:
             return
 
         if resultado_final == "PASS":
-            messagebox.showinfo(
-                "Resultado",
-                "La unidad terminó todas las pruebas correctamente.\n\n"
-                "Resultado final: PASS"
-            )
+            self.label_status.configure(
+                text= "PASS",
+                text_color="#006100",
+                bg_color="#C6EFCE"
+                )
 
         else:
-            messagebox.showwarning(
-                "Resultado",
-                "Una o más pruebas están fuera de límite.\n\n"
-                "Resultado final: FAIL"
-            )
+            self.label_status.configure(
+                text= "FAIL",
+                text_color="#9C0006",
+                bg_color="#FFC7CE"
+                )
 
 
 def cargar_modulo_modelo(nombre_archivo):
