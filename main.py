@@ -346,6 +346,7 @@ class VentanaPrincipal:
         )
 
         self.crear_interfaz()
+        self.cargar_pruebas_modelo()
 
         # Maximiza la ventana después de abrirla
         self.ventana.after(
@@ -516,7 +517,7 @@ class VentanaPrincipal:
             self.root_login.destroy()
 
     def iniciar_pruebas(self):
-        """Carga el módulo del modelo y ejecuta la secuencia de pruebas."""
+        """Ejecuta la secuencia de pruebas del modelo seleccionado."""
 
         try:
             configuracion = CONFIGURACION_MODELOS.get(
@@ -530,19 +531,34 @@ class VentanaPrincipal:
                 )
                 return
 
-            nombre_archivo = configuracion["archivo"]
             nombre_clase = configuracion["clase"]
 
-            modulo_modelo = cargar_modulo_modelo(
-                nombre_archivo
+            # Reinicia visualmente las filas
+            for fila in self.filas_pruebas:
+                fila["valor"].configure(
+                    text="---"
+                )
+
+                fila["estado"].configure(
+                    text="PENDIENTE",
+                    text_color="#D9A441"
+                )
+
+            self.label_status.configure(
+                text="PROBANDO",
+                text_color="#FFFFFF",
+                bg_color="#D9A441"
             )
 
-            self.crear_tabla_pruebas(
-                modulo_modelo.PRUEBAS
+            self.boton_iniciar.configure(
+                state="disabled"
             )
+
+            # Fuerza a Tkinter a dibujar los cambios antes de medir
+            self.ventana.update_idletasks()
 
             clase_prueba = getattr(
-                modulo_modelo,
+                self.modulo_modelo,
                 nombre_clase
             )
 
@@ -550,12 +566,19 @@ class VentanaPrincipal:
 
             resultado = secuencia.ejecutar_pruebas()
 
-            self.procesar_resultados(resultado)
+            self.procesar_resultados(
+                resultado
+            )
 
         except Exception as error:
             messagebox.showerror(
                 "Error",
                 f"No fue posible ejecutar las pruebas:\n\n{error}"
+            )
+
+        finally:
+            self.boton_iniciar.configure(
+                state="normal"
             )
 
     def procesar_resultados(self, resultado):
@@ -742,6 +765,35 @@ class VentanaPrincipal:
                 "valor": label_valor,
                 "estado": label_estado
             })
+
+    def cargar_pruebas_modelo(self):
+        """Carga las pruebas del modelo y las muestra sin ejecutarlas."""
+
+        try:
+            configuracion = CONFIGURACION_MODELOS.get(self.modelo)
+
+            if configuracion is None:
+                messagebox.showerror(
+                    "Error",
+                    f"No existe configuración para el modelo: {self.modelo}"
+                )
+                return
+
+            nombre_archivo = configuracion["archivo"]
+
+            self.modulo_modelo = cargar_modulo_modelo(
+                nombre_archivo
+            )
+
+            self.crear_tabla_pruebas(
+                self.modulo_modelo.PRUEBAS
+            )
+
+        except Exception as error:
+            messagebox.showerror(
+                "Error",
+                f"No fue posible cargar las pruebas:\n\n{error}"
+            )
 
 
 def cargar_modulo_modelo(nombre_archivo):
