@@ -44,12 +44,6 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 
-ARCHIVOS_MODELOS = {
-    "PCBA Modelo 1": "TestPCB1.py",
-    "PCBA Modelo 2": "TestPCB2.py",
-    "PCBA Modelo 3": "TestPCB3.py"
-}
-
 MODELOS_PCBA = [
     "PCBA Modelo 1",
     "PCBA Modelo 2",
@@ -330,6 +324,10 @@ class VentanaPrincipal:
     def __init__(self, root_login, datos_login):
         self.root_login = root_login
         self.datos_login = datos_login
+        # Datos recibidos desde el login
+        self.modelo = datos_login["modelo"]
+        self.empleado = datos_login["empleado"]
+        self.orden = datos_login["orden"]
 
         self.ventana = ctk.CTkToplevel(self.root_login)
 
@@ -429,6 +427,17 @@ class VentanaPrincipal:
         self.label_mensaje.pack(
             pady=10
         )
+        self.frame_tabla = ctk.CTkScrollableFrame(
+            self.frame_contenido,
+            label_text="Resultados de pruebas"
+        )
+
+        self.frame_tabla.pack(
+            fill="both",
+            expand=True,
+            padx=20,
+            pady=20
+        )
 
         self.label_status = ctk.CTkLabel(
             self.frame_contenido,
@@ -441,9 +450,8 @@ class VentanaPrincipal:
             width=200
         )
         self.label_status.pack(
-            pady = 50
+            pady=50
         )
-
 
         self.boton_iniciar = ctk.CTkButton(
             self.frame_contenido,
@@ -459,27 +467,27 @@ class VentanaPrincipal:
         )
 
         self.boton_cerrar_sesion = ctk.CTkButton(
-                    self.frame_contenido,
-                    text="Cerrar sesión",
-                    command=self.cerrar_sesion,
-                    width=180,
-                    height=42,
-                    font=("Arial", 15, "bold"),
-                    fg_color="#A33A3A",
-                    hover_color="#7F2D2D"
-                )
+            self.frame_contenido,
+            text="Cerrar sesión",
+            command=self.cerrar_sesion,
+            width=180,
+            height=42,
+            font=("Arial", 15, "bold"),
+            fg_color="#A33A3A",
+            hover_color="#7F2D2D"
+        )
         self.boton_cerrar_sesion.pack(
             pady=40
-            )
+        )
 
     def cerrar_sesion(self):
         """Cierra la ventana principal y regresa al Login."""
 
         self.label_status.configure(
-            text= "En Espera",
+            text="En Espera",
             text_color="#002060",
             bg_color="#A6C9EC"
-            )
+        )
 
         respuesta = messagebox.askyesno(
             "Cerrar sesión",
@@ -508,41 +516,29 @@ class VentanaPrincipal:
             self.root_login.destroy()
 
     def iniciar_pruebas(self):
-        """Ejecuta la secuencia del modelo seleccionado."""
-
-        modelo_seleccionado = self.datos_login["modelo"]
-
-        configuracion = CONFIGURACION_MODELOS.get(
-            modelo_seleccionado
-        )
-
-        if configuracion is None:
-            messagebox.showerror(
-                "Modelo no configurado",
-                f"No existe una configuración para:\n"
-                f"{modelo_seleccionado}"
-            )
-            return
-
-        self.label_status.configure(
-            text= "EN PROCESO",
-            text_color="#9C5700",
-            bg_color="#FFEB9C"
-            )
-
-        nombre_archivo = configuracion["archivo"]
-        nombre_clase = configuracion["clase"]
+        """Carga el módulo del modelo y ejecuta la secuencia de pruebas."""
 
         try:
-            self.boton_iniciar.configure(
-                state="disabled",
-                text="Ejecutando pruebas..."
+            configuracion = CONFIGURACION_MODELOS.get(
+                self.modelo
             )
 
-            self.ventana.update_idletasks()
+            if configuracion is None:
+                messagebox.showerror(
+                    "Error",
+                    f"No existe configuración para el modelo: {self.modelo}"
+                )
+                return
+
+            nombre_archivo = configuracion["archivo"]
+            nombre_clase = configuracion["clase"]
 
             modulo_modelo = cargar_modulo_modelo(
                 nombre_archivo
+            )
+
+            self.crear_tabla_pruebas(
+                modulo_modelo.PRUEBAS
             )
 
             clase_prueba = getattr(
@@ -556,50 +552,53 @@ class VentanaPrincipal:
 
             self.procesar_resultados(resultado)
 
-        except FileNotFoundError as error:
-            messagebox.showerror(
-                "Archivo no encontrado",
-                str(error)
-            )
-
-        except AttributeError:
-            messagebox.showerror(
-                "Clase no encontrada",
-                f"El archivo {nombre_archivo} no contiene "
-                f"la clase {nombre_clase}."
-            )
-
         except Exception as error:
             messagebox.showerror(
-                "Error de prueba",
-                f"Ocurrió un error durante la prueba:\n{error}"
-            )
-
-        finally:
-            self.boton_iniciar.configure(
-                state="normal",
-                text="Iniciar prueba"
+                "Error",
+                f"No fue posible ejecutar las pruebas:\n\n{error}"
             )
 
     def procesar_resultados(self, resultado):
-        """Recibe los resultados enviados por modelo_1.py."""
+        """Muestra los resultados en la tabla dinámica."""
 
         estado_ejecucion = resultado["estado"]
         resultado_final = resultado["resultado_final"]
         mensaje = resultado["mensaje"]
         mediciones = resultado["mediciones"]
 
-        print("\nResultado recibido en main.py")
-        print(f"Estado: {estado_ejecucion}")
-        print(f"Resultado final: {resultado_final}")
-        print(f"Mensaje: {mensaje}")
+        for indice, medicion in enumerate(mediciones):
 
-        for medicion in mediciones:
-            print(
-                f"{medicion['nombre']} | "
-                f"Canal: {medicion['canal']} | "
-                f"Valor: {medicion['valor']} | "
-                f"Estado: {medicion['estado']}"
+            if indice >= len(self.filas_pruebas):
+                break
+
+            label_valor = self.filas_pruebas[indice]["valor"]
+            label_estado = self.filas_pruebas[indice]["estado"]
+
+            valor = medicion["valor"]
+            unidad = medicion["unidad"]
+            estado = medicion["estado"]
+
+            if valor is None:
+                texto_valor = "Sin lectura"
+            else:
+                texto_valor = f"{valor:.4f} {unidad}"
+
+            label_valor.configure(
+                text=texto_valor
+            )
+
+            if estado == "PASS":
+                color_estado = "#41C76F"
+
+            elif estado == "FAIL":
+                color_estado = "#FF5C5C"
+
+            else:
+                color_estado = "#F2A541"
+
+            label_estado.configure(
+                text=estado,
+                text_color=color_estado
             )
 
         if estado_ejecucion == "ERROR":
@@ -610,54 +609,175 @@ class VentanaPrincipal:
             return
 
         if resultado_final == "PASS":
-            self.label_status.configure(
-                text= "PASS",
-                text_color="#006100",
-                bg_color="#C6EFCE"
-                )
-
+            messagebox.showinfo(
+                "Resultado",
+                "La unidad terminó todas las pruebas correctamente.\n\n"
+                "Resultado final: PASS"
+            )
         else:
-            self.label_status.configure(
-                text= "FAIL",
-                text_color="#9C0006",
-                bg_color="#FFC7CE"
-                )
+            messagebox.showwarning(
+                "Resultado",
+                "Una o más pruebas están fuera de límite.\n\n"
+                "Resultado final: FAIL"
+            )
+
+    def crear_tabla_pruebas(self, pruebas):
+        """Crea una fila por cada prueba del modelo cargado."""
+
+        # Elimina filas anteriores
+        for widget in self.frame_tabla.winfo_children():
+            widget.destroy()
+
+        self.filas_pruebas = []
+
+        # Encabezados
+        encabezados = [
+            "Prueba",
+            "Descripción",
+            "Canal",
+            "Límites",
+            "Valor",
+            "Estado"
+        ]
+
+        for columna, texto in enumerate(encabezados):
+            label = ctk.CTkLabel(
+                self.frame_tabla,
+                text=texto,
+                font=("Arial", 14, "bold")
+            )
+            label.grid(
+                row=0,
+                column=columna,
+                padx=10,
+                pady=8,
+                sticky="ew"
+            )
+
+        # Crear una fila por cada prueba
+        for indice, prueba in enumerate(pruebas, start=1):
+
+            label_nombre = ctk.CTkLabel(
+                self.frame_tabla,
+                text=prueba["nombre"],
+                font=("Arial", 13)
+            )
+            label_nombre.grid(
+                row=indice,
+                column=0,
+                padx=10,
+                pady=5,
+                sticky="w"
+            )
+
+            label_descripcion = ctk.CTkLabel(
+                self.frame_tabla,
+                text=prueba["descripcion"],
+                font=("Arial", 13)
+            )
+            label_descripcion.grid(
+                row=indice,
+                column=1,
+                padx=10,
+                pady=5,
+                sticky="w"
+            )
+
+            label_canal = ctk.CTkLabel(
+                self.frame_tabla,
+                text=str(prueba["canal"]),
+                font=("Arial", 13)
+            )
+            label_canal.grid(
+                row=indice,
+                column=2,
+                padx=10,
+                pady=5
+            )
+
+            texto_limites = (
+                f"{prueba['minimo']} - "
+                f"{prueba['maximo']} "
+                f"{prueba['unidad']}"
+            )
+
+            label_limites = ctk.CTkLabel(
+                self.frame_tabla,
+                text=texto_limites,
+                font=("Arial", 13)
+            )
+            label_limites.grid(
+                row=indice,
+                column=3,
+                padx=10,
+                pady=5
+            )
+
+            label_valor = ctk.CTkLabel(
+                self.frame_tabla,
+                text="---",
+                font=("Arial", 13)
+            )
+            label_valor.grid(
+                row=indice,
+                column=4,
+                padx=10,
+                pady=5
+            )
+
+            label_estado = ctk.CTkLabel(
+                self.frame_tabla,
+                text="PENDIENTE",
+                font=("Arial", 13, "bold"),
+                text_color="#D9A441"
+            )
+            label_estado.grid(
+                row=indice,
+                column=5,
+                padx=10,
+                pady=5
+            )
+
+            self.filas_pruebas.append({
+                "valor": label_valor,
+                "estado": label_estado
+            })
 
 
 def cargar_modulo_modelo(nombre_archivo):
-    """
-    Carga dinámicamente un archivo Python ubicado
-    en la carpeta modelos.
-    """
+    """Carga dinámicamente un archivo Python de la carpeta modelos."""
 
-    ruta_base = obtener_ruta_base()
+    ruta_base = os.path.dirname(
+        os.path.abspath(__file__)
+    )
 
-    ruta_modelo = os.path.join(
+    ruta_archivo = os.path.join(
         ruta_base,
         "models",
         nombre_archivo
     )
 
-    if not os.path.exists(ruta_modelo):
+    if not os.path.exists(ruta_archivo):
         raise FileNotFoundError(
-            f"No se encontró el archivo del modelo:\n{ruta_modelo}"
+            f"No se encontró el archivo:\n{ruta_archivo}"
         )
 
-    nombre_modulo = os.path.splitext(nombre_archivo)[0]
+    nombre_modulo = os.path.splitext(
+        nombre_archivo
+    )[0]
 
-    spec = importlib.util.spec_from_file_location(
+    especificacion = importlib.util.spec_from_file_location(
         nombre_modulo,
-        ruta_modelo
+        ruta_archivo
     )
 
-    if spec is None or spec.loader is None:
-        raise ImportError(
-            f"No fue posible cargar el módulo {nombre_archivo}."
-        )
+    modulo = importlib.util.module_from_spec(
+        especificacion
+    )
 
-    modulo = importlib.util.module_from_spec(spec)
-
-    spec.loader.exec_module(modulo)
+    especificacion.loader.exec_module(
+        modulo
+    )
 
     return modulo
 
