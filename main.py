@@ -414,20 +414,9 @@ class VentanaPrincipal:
             font=("Arial", 24, "bold")
         )
         self.label_modelo.pack(
-            pady=(60, 15)
+            pady=(10, 15)
         )
 
-        self.label_mensaje = ctk.CTkLabel(
-            self.frame_contenido,
-            text=(
-                "Secuencia de pruebas"
-            ),
-            font=("Arial", 17),
-            text_color="#AEB4C8"
-        )
-        self.label_mensaje.pack(
-            pady=10
-        )
         self.frame_tabla = ctk.CTkScrollableFrame(
             self.frame_contenido,
             label_text="Resultados de pruebas"
@@ -437,7 +426,7 @@ class VentanaPrincipal:
             fill="both",
             expand=True,
             padx=20,
-            pady=20
+            pady=10
         )
 
         self.label_status = ctk.CTkLabel(
@@ -445,13 +434,12 @@ class VentanaPrincipal:
             text=(
                 "En Espera"
             ),
-            font=("Arial", 60, "bold"),
+            font=("Arial",50, "bold"),
             text_color="#002060",
             bg_color="#A6C9EC",
-            width=200
         )
         self.label_status.pack(
-            pady=50
+            pady=10
         )
 
         self.boton_iniciar = ctk.CTkButton(
@@ -464,7 +452,7 @@ class VentanaPrincipal:
         )
 
         self.boton_iniciar.pack(
-            pady=30
+            pady=20
         )
 
         self.boton_cerrar_sesion = ctk.CTkButton(
@@ -478,7 +466,7 @@ class VentanaPrincipal:
             hover_color="#7F2D2D"
         )
         self.boton_cerrar_sesion.pack(
-            pady=40
+            pady=20
         )
 
     def cerrar_sesion(self):
@@ -541,13 +529,13 @@ class VentanaPrincipal:
 
                 fila["estado"].configure(
                     text="PENDIENTE",
-                    text_color="#D9A441"
+                    text_color="#9C5700"
                 )
 
             self.label_status.configure(
-                text="PROBANDO",
-                text_color="#FFFFFF",
-                bg_color="#D9A441"
+                text="En Proceso",
+                text_color="#9C5700",
+                bg_color="#FFEB9C"
             )
 
             self.boton_iniciar.configure(
@@ -632,17 +620,17 @@ class VentanaPrincipal:
             return
 
         if resultado_final == "PASS":
-            messagebox.showinfo(
-                "Resultado",
-                "La unidad terminó todas las pruebas correctamente.\n\n"
-                "Resultado final: PASS"
-            )
+            self.label_status.configure(
+                text="PASS",
+                text_color="#006100",
+                bg_color="#C6EFCE"
+                )
         else:
-            messagebox.showwarning(
-                "Resultado",
-                "Una o más pruebas están fuera de límite.\n\n"
-                "Resultado final: FAIL"
-            )
+            self.label_status.configure(
+                text="FAIL",
+                text_color="#9C0006",
+                bg_color="#FFC7CE"
+                )
 
     def crear_tabla_pruebas(self, pruebas):
         """Crea una fila por cada prueba del modelo cargado."""
