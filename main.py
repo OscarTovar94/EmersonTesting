@@ -329,6 +329,8 @@ class VentanaPrincipal:
         self.modelo = datos_login["modelo"]
         self.empleado = datos_login["empleado"]
         self.orden = datos_login["orden"]
+        self.cerrando = False
+        self.prueba_en_proceso = False
 
         self.ventana = ctk.CTkToplevel(self.root_login)
 
@@ -572,6 +574,9 @@ class VentanaPrincipal:
     def iniciar_pruebas(self):
         """Prepara la interfaz e inicia las pruebas en segundo plano."""
 
+        if self.prueba_en_proceso:
+            return
+
         configuracion = CONFIGURACION_MODELOS.get(self.modelo)
 
         if configuracion is None:
@@ -593,7 +598,7 @@ class VentanaPrincipal:
             )
 
             fila["estado"].configure(
-                text="PENDIENTE",
+                text="Procesando",
                 text_color="#D9A441"
             )
 
