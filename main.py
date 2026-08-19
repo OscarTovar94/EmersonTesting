@@ -26,6 +26,8 @@ import win32event
 import win32api
 import winerror
 import threading
+import csv
+from datetime import datetime
 
 
 # ---- Control de instancia única ----
@@ -338,6 +340,17 @@ class VentanaPrincipal:
         self.variable_id_pieza = tk.StringVar()
 
         self.ventana = ctk.CTkToplevel(self.root_login)
+
+        self.archivo_resultados = os.path.join(
+            obtener_ruta_base(),
+            "LogFile",
+            "TestResults.csv"
+        )
+
+        os.makedirs(
+            os.path.dirname(self.archivo_resultados),
+            exist_ok=True
+        )
 
         self.ventana.title("Emerson - Sistema de Pruebas")
         self.ventana.geometry("1100x700")
@@ -1181,6 +1194,9 @@ class VentanaPrincipal:
         self.prueba_en_proceso = False
 
         self.procesar_resultados(resultado)
+        self.guardar_resultado_csv(
+            resultado
+        )
 
         if self.boton_iniciar.winfo_exists():
             self.boton_iniciar.configure(
@@ -1212,6 +1228,145 @@ class VentanaPrincipal:
             "Error",
             f"No fue posible ejecutar las pruebas:\n\n{mensaje_error}"
         )
+
+    def obtener_encabezados_csv(self):
+        """
+        Construye los encabezados del CSV.
+        Cada prueba ocupa una sola columna.
+        """
+
+        encabezados = [
+            "Part_ID",
+            "Date",
+            "Employee",
+            "Work_Order",
+            "Model",
+            "Part_Number",
+            "Result"
+        ]
+
+        for prueba in self.modulo_modelo.PRUEBAS:
+            encabezados.append(
+                prueba["nombre"]
+            )
+
+        return encabezados
+
+    def guardar_resultado_csv(self, resultado):
+        """
+        Guarda una fila por cada pieza probada.
+        Cada prueba se guarda en una columna.
+        """
+
+        if not resultado:
+            return False
+
+        encabezados = self.obtener_encabezados_csv()
+
+        numero_parte = str(
+            getattr(
+                self.modulo_modelo,
+                "NUMERO_PARTE",
+                ""
+            )
+        ).strip()
+
+        fila = {
+            "Part_ID": self.id_pieza_actual,
+            "Date": datetime.now().strftime(
+                "%d/%m/%Y %H:%M:%S"
+            ),
+            "Employee": self.empleado,
+            "Work_Order": self.orden,
+            "Model": self.modelo,
+            "Part_Number": numero_parte,
+            "Result": resultado.get(
+                "resultado_final",
+                ""
+            )
+        }
+
+        # =====================================================
+        # GUARDAR LAS MEDICIONES
+        # =====================================================
+
+        for medicion in resultado.get(
+            "mediciones",
+            []
+        ):
+            nombre = medicion.get(
+                "nombre",
+                ""
+            )
+
+            valor = medicion.get(
+                "valor"
+            )
+
+            if not nombre:
+                continue
+
+            if valor is None:
+                fila[nombre] = ""
+            else:
+                fila[nombre] = valor
+
+        # Completar columnas faltantes
+        for encabezado in encabezados:
+            if encabezado not in fila:
+                fila[encabezado] = ""
+
+        archivo_existe = (
+            os.path.exists(
+                self.archivo_resultados
+            )
+            and os.path.getsize(
+                self.archivo_resultados
+            ) > 0
+        )
+
+        try:
+            with open(
+                self.archivo_resultados,
+                mode="a",
+                newline="",
+                encoding="utf-8-sig"
+            ) as archivo:
+
+                escritor = csv.DictWriter(
+                    archivo,
+                    fieldnames=encabezados
+                )
+
+                if not archivo_existe:
+                    escritor.writeheader()
+
+                escritor.writerow(fila)
+
+            return True
+
+        except PermissionError:
+            messagebox.showerror(
+                "Archivo en uso",
+                (
+                    "No fue posible guardar el resultado.\n\n"
+                    "Cierre TestResults.csv si está abierto "
+                    "en Excel."
+                ),
+                parent=self.ventana
+            )
+            return False
+
+        except OSError as error:
+            messagebox.showerror(
+                "Error de guardado",
+                (
+                    "No fue posible guardar el resultado.\n\n"
+                    f"{error}"
+                ),
+                parent=self.ventana
+            )
+            return False
 
 
 def cargar_modulo_modelo(nombre_archivo):
