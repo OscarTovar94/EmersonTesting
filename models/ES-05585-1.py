@@ -1,34 +1,115 @@
 import pyvisa
 
-NOMBRE_MODELO = "PCBA Modelo 1"
+NOMBRE_MODELO = "ES-05585-1 640160"
 RECURSO_VISA = "ASRL10::INSTR"
 
 PRUEBAS = [
     {
         "numero": 1,
-        "nombre": "Test W1",
-        "descripcion": "Medición de resistencia W1",
+        "nombre": "Test_1",
+        "descripcion": "Continuity J7-1 to J9-6",
         "canal": 101,
-        "minimo": 800,
-        "maximo": 10000,
+        "minimo": 0.0,
+        "maximo": 2.0,
         "unidad": "Ω"
     },
     {
         "numero": 2,
-        "nombre": "Test W2",
-        "descripcion": "Medición de resistencia W2",
+        "nombre": "Test_2",
+        "descripcion": "Continuity J7-2 to J9-5",
         "canal": 102,
         "minimo": 0.0,
-        "maximo": 10.0,
+        "maximo": 2.0,
         "unidad": "Ω"
     },
     {
         "numero": 3,
-        "nombre": "Test W3",
-        "descripcion": "Medición de resistencia W2",
+        "nombre": "Test_3",
+        "descripcion": "Continuity J7-3 to J9-4",
         "canal": 103,
         "minimo": 0.0,
-        "maximo": 10.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 4,
+        "nombre": "Test_4",
+        "descripcion": "Continuity J7-4 to J9-3",
+        "canal": 104,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 5,
+        "nombre": "Test_5",
+        "descripcion": "Continuity J7-5 to J9-2",
+        "canal": 105,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 6,
+        "nombre": "Test_6",
+        "descripcion": "Continuity J7-6 to J9-1",
+        "canal": 106,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 7,
+        "nombre": "Test_7",
+        "descripcion": "Continuity J8-1 to J10-6",
+        "canal": 107,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 8,
+        "nombre": "Test_8",
+        "descripcion": "Continuity J8-2 to J10-5",
+        "canal": 108,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 9,
+        "nombre": "Test_9",
+        "descripcion": "Continuity J8-3 to J10-4",
+        "canal": 109,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 10,
+        "nombre": "Test_10",
+        "descripcion": "Continuity J8-4 to J10-3",
+        "canal": 110,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 11,
+        "nombre": "Test_11",
+        "descripcion": "Continuity J8-5 to J10-2",
+        "canal": 111,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 12,
+        "nombre": "Test_12",
+        "descripcion": "Continuity J8-6 to J10-1",
+        "canal": 112,
+        "minimo": 0.0,
+        "maximo": 2.0,
         "unidad": "Ω"
     }
 ]

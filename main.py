@@ -46,14 +46,14 @@ ctk.set_default_color_theme("blue")
 
 
 MODELOS_PCBA = [
-    "PCBA Modelo 1",
+    "ES-05585-1 640160",
     "PCBA Modelo 2",
     "PCBA Modelo 3"
 ]
 
 CONFIGURACION_MODELOS = {
-    "PCBA Modelo 1": {
-        "archivo": "TestPCB1.py",
+    "ES-05585-1 640160": {
+        "archivo": "ES-05585-1.py",
         "clase": "PruebaModelo1"
     },
     "PCBA Modelo 2": {
