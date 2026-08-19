@@ -28,6 +28,7 @@ import winerror
 import threading
 import csv
 from datetime import datetime
+import time
 
 
 # ---- Control de instancia única ----
@@ -338,6 +339,20 @@ class VentanaPrincipal:
         self.id_pieza_actual = ""
         self.ventana_id_pieza = None
         self.variable_id_pieza = tk.StringVar()
+        # =====================================================
+        # CRONÓMETRO DE PRUEBA
+        # =====================================================
+
+        self.tiempo_inicio_prueba = None
+        self.after_cronometro = None
+
+        # =====================================================
+        # CONTADORES DE PRODUCCIÓN
+        # =====================================================
+
+        self.total_piezas = 0
+        self.piezas_pass = 0
+        self.piezas_fail =
 
         self.ventana = ctk.CTkToplevel(self.root_login)
 
@@ -436,6 +451,104 @@ class VentanaPrincipal:
         )
         self.label_modelo.pack(
             pady=(10, 15)
+        )
+        # =====================================================
+        # INDICADORES DE PRODUCCIÓN
+        # =====================================================
+
+        self.frame_indicadores = ctk.CTkFrame(
+            self.frame_contenido,
+            fg_color="transparent"
+        )
+
+        self.frame_indicadores.pack(
+            fill="x",
+            padx=20,
+            pady=(0, 10)
+        )
+
+        for columna in range(5):
+            self.frame_indicadores.grid_columnconfigure(
+                columna,
+                weight=1
+            )
+
+        def crear_tarjeta(
+            columna,
+            titulo,
+            valor,
+            color="#FFFFFF"
+        ):
+            frame = ctk.CTkFrame(
+                self.frame_indicadores,
+                corner_radius=10,
+                border_width=1,
+                border_color="#454B70"
+            )
+
+            frame.grid(
+                row=0,
+                column=columna,
+                padx=6,
+                pady=3,
+                sticky="ew"
+            )
+
+            ctk.CTkLabel(
+                frame,
+                text=titulo,
+                font=("Arial", 13, "bold"),
+                text_color="#AEB4C8"
+            ).pack(
+                pady=(8, 0)
+            )
+
+            label = ctk.CTkLabel(
+                frame,
+                text=valor,
+                font=("Arial", 25, "bold"),
+                text_color=color
+            )
+
+            label.pack(
+                pady=(2, 8)
+            )
+
+            return label
+
+        self.label_tiempo_prueba = crear_tarjeta(
+            0,
+            "TIEMPO DE PRUEBA",
+            "00:00.0",
+            "#57A9FF"
+        )
+
+        self.label_total_piezas = crear_tarjeta(
+            1,
+            "TOTAL",
+            "0",
+            "#FFFFFF"
+        )
+
+        self.label_piezas_pass = crear_tarjeta(
+            2,
+            "PASS",
+            "0",
+            "#41C76F"
+        )
+
+        self.label_piezas_fail = crear_tarjeta(
+            3,
+            "FAIL",
+            "0",
+            "#FF5C5C"
+        )
+
+        self.label_fpy = crear_tarjeta(
+            4,
+            "FPY",
+            "0.00 %",
+            "#57A9FF"
         )
 
         self.frame_tabla = ctk.CTkScrollableFrame(
@@ -899,6 +1012,8 @@ class VentanaPrincipal:
             return
 
         self.prueba_en_proceso = True
+
+        self.iniciar_cronometro_prueba()
 
         # Bloquear botón
         self.boton_iniciar.configure(
@@ -1374,9 +1489,19 @@ class VentanaPrincipal:
         if not self.ventana.winfo_exists():
             return
 
+        self.detener_cronometro_prueba()
+
         self.prueba_en_proceso = False
 
         self.procesar_resultados(resultado)
+
+        self.actualizar_contadores_produccion(
+            resultado.get(
+                "resultado_final",
+                ""
+            )
+        )
+
         self.guardar_resultado_csv(
             resultado
         )
@@ -1394,6 +1519,8 @@ class VentanaPrincipal:
 
         if not self.ventana.winfo_exists():
             return
+
+        self.detener_cronometro_prueba()
 
         self.prueba_en_proceso = False
 
@@ -1551,19 +1678,183 @@ class VentanaPrincipal:
             )
             return False
 
-    def recibir_resultado_prueba(self, resultado):
+    def iniciar_cronometro_prueba(self):
         """
-        Recibe una prueba terminada desde el hilo de pruebas
-        y solicita su actualización en la interfaz.
+        Reinicia e inicia el cronómetro de la pieza actual.
+        """
+
+        # Cancelar cualquier callback anterior
+        if self.after_cronometro is not None:
+            try:
+                self.ventana.after_cancel(
+                    self.after_cronometro
+                )
+            except tk.TclError:
+                pass
+
+            self.after_cronometro = None
+
+        self.tiempo_inicio_prueba = (
+            time.perf_counter()
+        )
+
+        self.label_tiempo_prueba.configure(
+            text="00:00.0"
+        )
+
+        self.actualizar_cronometro_prueba()
+
+    def actualizar_cronometro_prueba(self):
+        """
+        Actualiza visualmente el tiempo transcurrido.
         """
 
         if self.cerrando:
             return
 
-        self.ventana.after(
-            0,
-            self.actualizar_prueba_en_tabla,
-            resultado
+        if self.tiempo_inicio_prueba is None:
+            return
+
+        if not self.prueba_en_proceso:
+            return
+
+        tiempo_transcurrido = (
+            time.perf_counter()
+            - self.tiempo_inicio_prueba
+        )
+
+        minutos = int(
+            tiempo_transcurrido // 60
+        )
+
+        segundos = (
+            tiempo_transcurrido % 60
+        )
+
+        texto = (
+            f"{minutos:02d}:"
+            f"{segundos:04.1f}"
+        )
+
+        self.label_tiempo_prueba.configure(
+            text=texto
+        )
+
+        self.after_cronometro = (
+            self.ventana.after(
+                100,
+                self.actualizar_cronometro_prueba
+            )
+        )
+
+    def detener_cronometro_prueba(self):
+        """
+        Detiene el cronómetro conservando
+        el tiempo final mostrado.
+        """
+
+        if self.tiempo_inicio_prueba is None:
+            return
+
+        tiempo_transcurrido = (
+            time.perf_counter()
+            - self.tiempo_inicio_prueba
+        )
+
+        minutos = int(
+            tiempo_transcurrido // 60
+        )
+
+        segundos = (
+            tiempo_transcurrido % 60
+        )
+
+        self.label_tiempo_prueba.configure(
+            text=(
+                f"{minutos:02d}:"
+                f"{segundos:04.1f}"
+            )
+        )
+
+        if self.after_cronometro is not None:
+            try:
+                self.ventana.after_cancel(
+                    self.after_cronometro
+                )
+            except tk.TclError:
+                pass
+
+        self.after_cronometro = None
+        self.tiempo_inicio_prueba = None
+
+    def actualizar_contadores_produccion(
+        self,
+        resultado_final
+    ):
+        """
+        Actualiza los contadores de piezas y FPY.
+        """
+
+        resultado_final = str(
+            resultado_final
+        ).strip().upper()
+
+        # Solo contar resultados realmente terminados
+        if resultado_final not in (
+            "PASS",
+            "FAIL"
+        ):
+            return
+
+        self.total_piezas += 1
+
+        if resultado_final == "PASS":
+
+            self.piezas_pass += 1
+
+        elif resultado_final == "FAIL":
+
+            self.piezas_fail += 1
+
+        # =====================================================
+        # FPY
+        # =====================================================
+
+        if self.total_piezas > 0:
+
+            fpy = (
+                self.piezas_pass
+                / self.total_piezas
+            ) * 100
+
+        else:
+
+            fpy = 0.0
+
+        # =====================================================
+        # ACTUALIZAR INTERFAZ
+        # =====================================================
+
+        self.label_total_piezas.configure(
+            text=str(
+                self.total_piezas
+            )
+        )
+
+        self.label_piezas_pass.configure(
+            text=str(
+                self.piezas_pass
+            )
+        )
+
+        self.label_piezas_fail.configure(
+            text=str(
+                self.piezas_fail
+            )
+        )
+
+        self.label_fpy.configure(
+            text=f"{fpy:.2f} %"
         )
 
 
