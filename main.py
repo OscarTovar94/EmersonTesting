@@ -55,7 +55,7 @@ MODELOS_PCBA = [
 
 CONFIGURACION_MODELOS = {
     "ES-05585-1 640160": {
-        "archivo": "ES-05585-1.py",
+        "archivo": "ES-05585-1_matriz.py",
         "clase": "PruebaModelo1"
     },
     "PCBA Modelo 2": {
