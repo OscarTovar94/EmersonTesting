@@ -913,7 +913,16 @@ class VentanaPrincipal:
             )
 
             fila["estado"].configure(
-                text="Procesando",
+                text="PENDIENTE",
+                text_color="#D9A441"
+            )
+
+        if self.filas_pruebas:
+
+            self.filas_pruebas[
+                0
+            ]["estado"].configure(
+                text="PROCESANDO",
                 text_color="#D9A441"
             )
 
@@ -1159,7 +1168,12 @@ class VentanaPrincipal:
             )
 
             secuencia = clase_prueba()
-            resultado = secuencia.ejecutar_pruebas()
+
+            resultado = secuencia.ejecutar_pruebas(
+                callback_resultado=(
+                    self.recibir_resultado_individual
+                )
+            )
 
             if self.cerrando:
                 return
@@ -1181,6 +1195,175 @@ class VentanaPrincipal:
                 lambda mensaje_error=mensaje_error:
                 self.mostrar_error_pruebas(mensaje_error)
             )
+
+    def recibir_resultado_individual(
+        self,
+        resultado
+    ):
+        """
+        Recibe el resultado de una prueba desde
+        el hilo de ejecución y solicita la
+        actualización de la interfaz.
+        """
+
+        if self.cerrando:
+            return
+
+        self.ventana.after(
+            0,
+            lambda resultado=resultado:
+            self.actualizar_resultado_individual(
+                resultado
+            )
+        )
+
+    def actualizar_resultado_individual(
+        self,
+        resultado
+    ):
+        """
+        Actualiza en tiempo real la fila de la prueba
+        que acaba de terminar.
+        """
+
+        # Evitar actualizar la interfaz si se está cerrando
+        if self.cerrando:
+            return
+
+        if not self.ventana.winfo_exists():
+            return
+
+        # =====================================================
+        # OBTENER NÚMERO DE PRUEBA
+        # =====================================================
+
+        numero_prueba = resultado.get(
+            "numero"
+        )
+
+        if numero_prueba is None:
+            return
+
+        try:
+            indice = int(
+                numero_prueba
+            ) - 1
+
+        except (TypeError, ValueError):
+            return
+
+        # =====================================================
+        # VALIDAR QUE EXISTA LA FILA
+        # =====================================================
+
+        if (
+            indice < 0
+            or indice >= len(
+                self.filas_pruebas
+            )
+        ):
+            return
+
+        fila = self.filas_pruebas[
+            indice
+        ]
+
+        # =====================================================
+        # OBTENER RESULTADOS
+        # =====================================================
+
+        valor = resultado.get(
+            "valor"
+        )
+
+        unidad = resultado.get(
+            "unidad",
+            ""
+        )
+
+        estado = resultado.get(
+            "estado",
+            "ERROR"
+        )
+
+        # =====================================================
+        # MOSTRAR VALOR
+        # =====================================================
+
+        if valor is None:
+
+            texto_valor = "Sin lectura"
+
+        else:
+
+            try:
+                texto_valor = (
+                    f"{float(valor):.4f} "
+                    f"{unidad}"
+                )
+
+            except (
+                TypeError,
+                ValueError
+            ):
+
+                texto_valor = (
+                    f"{valor} {unidad}"
+                )
+
+        fila["valor"].configure(
+            text=texto_valor
+        )
+
+        # =====================================================
+        # COLOR SEGÚN RESULTADO
+        # =====================================================
+
+        if estado == "PASS":
+
+            color_estado = "#41C76F"
+
+        elif estado == "FAIL":
+
+            color_estado = "#FF5C5C"
+
+        else:
+
+            color_estado = "#F2A541"
+
+        # =====================================================
+        # ACTUALIZAR ESTADO
+        # =====================================================
+
+        fila["estado"].configure(
+            text=estado,
+            text_color=color_estado
+        )
+
+        # =====================================================
+        # MARCAR SIGUIENTE PRUEBA COMO PROCESANDO
+        # =====================================================
+
+        siguiente_indice = (
+            indice + 1
+        )
+
+        if siguiente_indice < len(
+            self.filas_pruebas
+        ):
+
+            self.filas_pruebas[
+                siguiente_indice
+            ]["estado"].configure(
+                text="PROCESANDO",
+                text_color="#D9A441"
+            )
+
+        # =====================================================
+        # FORZAR ACTUALIZACIÓN VISUAL
+        # =====================================================
+
+        self.ventana.update_idletasks()
 
     def finalizar_pruebas(self, resultado):
         """Finaliza la ejecución y actualiza la interfaz."""
@@ -1367,6 +1550,21 @@ class VentanaPrincipal:
                 parent=self.ventana
             )
             return False
+
+    def recibir_resultado_prueba(self, resultado):
+        """
+        Recibe una prueba terminada desde el hilo de pruebas
+        y solicita su actualización en la interfaz.
+        """
+
+        if self.cerrando:
+            return
+
+        self.ventana.after(
+            0,
+            self.actualizar_prueba_en_tabla,
+            resultado
+        )
 
 
 def cargar_modulo_modelo(nombre_archivo):

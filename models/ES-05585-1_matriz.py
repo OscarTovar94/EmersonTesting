@@ -651,7 +651,7 @@ class PruebaModelo1:
     # SECUENCIA COMPLETA
     # ========================================================
 
-    def ejecutar_pruebas(self):
+    def ejecutar_pruebas(self, callback_resultado=None):
         """Ejecuta continuidades y cortos."""
 
         self.resultados.clear()
@@ -705,6 +705,11 @@ class PruebaModelo1:
                 self.imprimir_resultado(
                     resultado
                 )
+
+                if callback_resultado is not None:
+                    callback_resultado(
+                        resultado
+                    )
 
             error_equipo = self.daq.query(
                 "SYST:ERR?"
