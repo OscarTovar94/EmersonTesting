@@ -9,6 +9,8 @@ PRUEBAS = [
         "numero": 1,
         "nombre": "Test_1",
         "descripcion": "Continuity J7-1 to J9-6",
+        "low":201,
+        "hig":202,
         "canal": 101,
         "minimo": 0.0,
         "maximo": 2.0,
