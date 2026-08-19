@@ -1,6 +1,7 @@
 import pyvisa
 
 NOMBRE_MODELO = "ES-05585-1 640160"
+NUMERO_PARTE = "640160"
 RECURSO_VISA = "ASRL10::INSTR"
 
 PRUEBAS = [
@@ -113,6 +114,7 @@ PRUEBAS = [
         "unidad": "Ω"
     }
 ]
+
 
 class PruebaModelo1:
     """Ejecuta las pruebas eléctricas del PCBA Modelo 1."""
@@ -368,6 +370,7 @@ class PruebaModelo1:
                 )
             finally:
                 self.rm = None
+
 
 if __name__ == "__main__":
     secuencia = PruebaModelo1()

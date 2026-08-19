@@ -101,7 +101,7 @@ class VentanaLogin:
         self.root.bind("<Return>", self.entrar)
 
         # Coloca el cursor en el primer campo
-        #self.entry_empleado.focus_set()
+        # self.entry_empleado.focus_set()
 
     def configurar_ventana(self):
         """Centra la ventana en la pantalla."""
@@ -185,7 +185,6 @@ class VentanaLogin:
             padx=55,
             pady=(0, 18)
         )
-        
 
         # Número de orden
         self.label_orden = ctk.CTkLabel(
@@ -334,6 +333,9 @@ class VentanaPrincipal:
         self.orden = datos_login["orden"]
         self.cerrando = False
         self.prueba_en_proceso = False
+        self.id_pieza_actual = ""
+        self.ventana_id_pieza = None
+        self.variable_id_pieza = tk.StringVar()
 
         self.ventana = ctk.CTkToplevel(self.root_login)
 
@@ -426,7 +428,7 @@ class VentanaPrincipal:
         self.frame_tabla = ctk.CTkScrollableFrame(
             self.frame_contenido,
             label_text="Resultados de pruebas",
-            #fg_color="transparent"
+            # fg_color="transparent"
         )
 
         self.frame_tabla.pack(
@@ -494,27 +496,405 @@ class VentanaPrincipal:
             pass
 
     def iniciar_pruebas(self):
-        """Prepara la interfaz e inicia las pruebas en segundo plano."""
+        """
+        Solicita primero el ID de la pieza.
+        Las pruebas eléctricas solamente comienzan
+        después de validar correctamente el ID.
+        """
 
         if self.prueba_en_proceso:
             return
 
-        configuracion = CONFIGURACION_MODELOS.get(self.modelo)
+        configuracion = CONFIGURACION_MODELOS.get(
+            self.modelo
+        )
 
         if configuracion is None:
             messagebox.showerror(
                 "Error",
-                f"No existe configuración para el modelo: {self.modelo}"
+                (
+                    "No existe configuración para el modelo:\n"
+                    f"{self.modelo}"
+                ),
+                parent=self.ventana
             )
             return
 
-        # Evita presionar el botón varias veces
+        if not hasattr(
+            self.modulo_modelo,
+            "NUMERO_PARTE"
+        ):
+            messagebox.showerror(
+                "Configuración incompleta",
+                (
+                    "El archivo del modelo no contiene "
+                    "la variable NUMERO_PARTE."
+                ),
+                parent=self.ventana
+            )
+            return
+
+        self.solicitar_id_pieza()
+
+    def solicitar_id_pieza(self):
+        """
+        Solicita el ID de 16 dígitos antes de ejecutar
+        las pruebas eléctricas.
+        """
+
+        if (
+            self.ventana_id_pieza is not None
+            and self.ventana_id_pieza.winfo_exists()
+        ):
+            self.ventana_id_pieza.lift()
+            self.ventana_id_pieza.focus_force()
+            return
+
+        self.variable_id_pieza.set("")
+
+        numero_parte = str(
+            self.modulo_modelo.NUMERO_PARTE
+        ).strip()
+
+        ventana = ctk.CTkToplevel(
+            self.ventana
+        )
+
+        self.ventana_id_pieza = ventana
+
+        ventana.title(
+            "Validación de ID"
+        )
+
+        ventana.geometry(
+            "600x360"
+        )
+
+        ventana.resizable(
+            False,
+            False
+        )
+
+        ventana.transient(
+            self.ventana
+        )
+
+        ventana.grab_set()
+
+        ventana.grid_columnconfigure(
+            0,
+            weight=1
+        )
+
+        ventana.protocol(
+            "WM_DELETE_WINDOW",
+            self.cerrar_ventana_id
+        )
+
+        # =====================================================
+        # TÍTULO
+        # =====================================================
+
+        titulo = ctk.CTkLabel(
+            ventana,
+            text="VALIDACIÓN DE ID DE PIEZA",
+            font=("Arial", 24, "bold")
+        )
+
+        titulo.grid(
+            row=0,
+            column=0,
+            padx=30,
+            pady=(30, 10)
+        )
+
+        # =====================================================
+        # INFORMACIÓN
+        # =====================================================
+
+        informacion = ctk.CTkLabel(
+            ventana,
+            text=(
+                f"Modelo: {self.modelo}\n"
+                f"Número de parte esperado: {numero_parte}"
+            ),
+            font=("Arial", 16, "bold"),
+            text_color="#AEB4C8"
+        )
+
+        informacion.grid(
+            row=1,
+            column=0,
+            padx=30,
+            pady=(5, 20)
+        )
+
+        # =====================================================
+        # ENTRY
+        # =====================================================
+
+        self.entry_id_pieza = ctk.CTkEntry(
+            ventana,
+            textvariable=self.variable_id_pieza,
+            placeholder_text="Ingrese o escanee ID de 16 dígitos",
+            height=50,
+            width=430,
+            justify="center",
+            font=("Arial", 19, "bold")
+        )
+
+        self.entry_id_pieza.grid(
+            row=2,
+            column=0,
+            padx=40,
+            pady=10
+        )
+
+        # Enter = validar
+        self.entry_id_pieza.bind(
+            "<Return>",
+            lambda event: self.validar_id_pieza()
+        )
+
+        # =====================================================
+        # ESTADO
+        # =====================================================
+
+        self.label_estado_id = ctk.CTkLabel(
+            ventana,
+            text="Esperando ID...",
+            font=("Arial", 14, "bold"),
+            text_color="#D9A441"
+        )
+
+        self.label_estado_id.grid(
+            row=3,
+            column=0,
+            padx=30,
+            pady=(5, 10)
+        )
+
+        # =====================================================
+        # BOTONES
+        # =====================================================
+
+        frame_botones = ctk.CTkFrame(
+            ventana,
+            fg_color="transparent"
+        )
+
+        frame_botones.grid(
+            row=4,
+            column=0,
+            padx=40,
+            pady=(10, 25),
+            sticky="ew"
+        )
+
+        frame_botones.grid_columnconfigure(
+            0,
+            weight=1
+        )
+
+        frame_botones.grid_columnconfigure(
+            1,
+            weight=1
+        )
+
+        boton_cancelar = ctk.CTkButton(
+            frame_botones,
+            text="Cancelar",
+            height=42,
+            font=("Arial", 15, "bold"),
+            fg_color="#5B627E",
+            hover_color="#484E66",
+            command=self.cerrar_ventana_id
+        )
+
+        boton_cancelar.grid(
+            row=0,
+            column=0,
+            padx=(0, 8),
+            sticky="ew"
+        )
+
+        boton_validar = ctk.CTkButton(
+            frame_botones,
+            text="Validar ID",
+            height=42,
+            font=("Arial", 15, "bold"),
+            command=self.validar_id_pieza
+        )
+
+        boton_validar.grid(
+            row=0,
+            column=1,
+            padx=(8, 0),
+            sticky="ew"
+        )
+
+        ventana.after(
+            150,
+            self.entry_id_pieza.focus_set
+        )
+
+    def validar_id_pieza(self):
+        """
+        Valida que el ID:
+
+        1. Contenga exactamente 16 dígitos.
+        2. Contenga solamente números.
+        3. Sus primeros 6 dígitos correspondan
+        al número de parte del modelo.
+        """
+
+        id_pieza = (
+            self.variable_id_pieza
+            .get()
+            .strip()
+        )
+
+        numero_parte = str(
+            self.modulo_modelo.NUMERO_PARTE
+        ).strip()
+
+        # =====================================================
+        # CAMPO VACÍO
+        # =====================================================
+
+        if not id_pieza:
+            self.label_estado_id.configure(
+                text="Ingrese el ID de la pieza.",
+                text_color="#FF5C5C"
+            )
+
+            self.entry_id_pieza.focus_set()
+            return
+
+        # =====================================================
+        # SOLO NÚMEROS
+        # =====================================================
+
+        if not id_pieza.isdigit():
+            self.label_estado_id.configure(
+                text=(
+                    "ID incorrecto: solamente se permiten números."
+                ),
+                text_color="#FF5C5C"
+            )
+
+            self.entry_id_pieza.focus_set()
+            self.entry_id_pieza.select_range(
+                0,
+                "end"
+            )
+
+            return
+
+        # =====================================================
+        # 16 DÍGITOS
+        # =====================================================
+
+        if len(id_pieza) != 16:
+            self.label_estado_id.configure(
+                text=(
+                    f"ID incorrecto: {len(id_pieza)}/16 dígitos."
+                ),
+                text_color="#FF5C5C"
+            )
+
+            self.entry_id_pieza.focus_set()
+            self.entry_id_pieza.select_range(
+                0,
+                "end"
+            )
+
+            return
+
+        # =====================================================
+        # NÚMERO DE PARTE
+        # =====================================================
+
+        if not id_pieza.startswith(
+            numero_parte
+        ):
+            self.label_estado_id.configure(
+                text=(
+                    "ID incorrecto: "
+                    f"se esperaba número de parte {numero_parte}."
+                ),
+                text_color="#FF5C5C"
+            )
+
+            self.entry_id_pieza.focus_set()
+            self.entry_id_pieza.select_range(
+                0,
+                "end"
+            )
+
+            return
+
+        # =====================================================
+        # ID CORRECTO
+        # =====================================================
+
+        self.id_pieza_actual = id_pieza
+
+        self.label_estado_id.configure(
+            text="ID VÁLIDO",
+            text_color="#41C76F"
+        )
+
+        self.ventana_id_pieza.after(
+            300,
+            self.id_validado_correctamente
+        )
+
+    def id_validado_correctamente(self):
+        """
+        Cierra la validación de ID e inicia
+        las pruebas eléctricas.
+        """
+
+        self.cerrar_ventana_id()
+
+        self.iniciar_pruebas_resistencia()
+
+    def cerrar_ventana_id(self):
+        """Cierra la ventana de captura de ID."""
+
+        if (
+            self.ventana_id_pieza is not None
+            and self.ventana_id_pieza.winfo_exists()
+        ):
+            try:
+                self.ventana_id_pieza.grab_release()
+            except tk.TclError:
+                pass
+
+            self.ventana_id_pieza.destroy()
+
+        self.ventana_id_pieza = None
+
+    def iniciar_pruebas_resistencia(self):
+        """
+        Inicia las pruebas eléctricas después
+        de validar correctamente el ID.
+        """
+
+        if self.prueba_en_proceso:
+            return
+
+        self.prueba_en_proceso = True
+
+        # Bloquear botón
         self.boton_iniciar.configure(
             state="disabled"
         )
 
-        # Limpia los resultados de la prueba anterior
+        # Reiniciar tabla
         for fila in self.filas_pruebas:
+
             fila["valor"].configure(
                 text="---"
             )
@@ -530,7 +910,6 @@ class VentanaPrincipal:
             bg_color="#FFF2CC"
         )
 
-        # Permite que Tkinter dibuje los cambios
         self.ventana.update_idletasks()
 
         hilo_pruebas = threading.Thread(
