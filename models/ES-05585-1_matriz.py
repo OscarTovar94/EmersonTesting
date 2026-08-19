@@ -292,6 +292,24 @@ class PruebaModelo1:
             self.daq.write("*CLS")
             self.daq.write("*RST")
 
+            # Esperar a que el 34970A termine el reset
+            time.sleep(2.0)
+
+            # Inicializar matriz
+            self.apagar_matriz()
+
+            # Dejar estabilizar relevadores / puertos
+            time.sleep(0.25)
+
+            error = self.daq.query(
+                "SYST:ERR?"
+            ).strip()
+
+            print(
+                "Estado DAQ después de inicialización:",
+                error
+            )
+
             # Seguridad: al iniciar, intentar dejar toda la matriz apagada.
             self.apagar_matriz()
 
