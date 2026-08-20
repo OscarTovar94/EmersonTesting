@@ -35,10 +35,10 @@ PUERTO_LO_1 = 301
 PUERTO_LO_2 = 302
 
 # Canal del 34902A reservado para medir la matriz de cortos.
-CANAL_MATRIZ = 113
+CANAL_MATRIZ = 104
 
 # Tiempo para permitir que los relevadores se estabilicen.
-TIEMPO_RELE = 0.050
+TIEMPO_RELE = 0.500
 
 # IMPORTANTE:
 # Este ejemplo asume que escribir un bit = 1 activa el relé
@@ -46,7 +46,7 @@ TIEMPO_RELE = 0.050
 #
 # Si tu interfaz 34907A -> ULN2803A queda invertida eléctricamente,
 # cambia esta constante a False y valida primero con UN SOLO relé.
-SALIDA_ACTIVA_EN_1 = True
+SALIDA_ACTIVA_EN_1 = False
 
 
 # ============================================================
@@ -58,10 +58,14 @@ SALIDA_ACTIVA_EN_1 = True
 # NET1  = J7-1 / J9-6
 # NET2  = J7-2 / J9-5
 # ...
-#
+# 
 # NET1 a NET8  -> puerto 1, bits 0 a 7
 # NET9 a NET12 -> puerto 2, bits 0 a 3
 # ============================================================
+
+"""
+C=n(n-1)/2
+"""
 
 REDES = {
     1:  {"nombre": "NET1",  "puntos": "J7-1 / J9-6",  "puerto": 1, "bit": 0},
@@ -205,7 +209,6 @@ PRUEBAS_CONTINUIDAD = [
         "unidad": "Ω"
     },
 ]
-
 
 # ============================================================
 # GENERAR LAS 66 PRUEBAS DE CORTO

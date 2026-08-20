@@ -352,7 +352,7 @@ class VentanaPrincipal:
 
         self.total_piezas = 0
         self.piezas_pass = 0
-        self.piezas_fail =
+        self.piezas_fail = 0
 
         self.ventana = ctk.CTkToplevel(self.root_login)
 

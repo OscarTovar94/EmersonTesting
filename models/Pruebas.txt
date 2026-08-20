@@ -1,0 +1,142 @@
+REDES = {
+    1:  {"nombre": "NET1",  "puntos": "J7-1 / J9-6",  "puerto": 1, "bit": 0},
+    2:  {"nombre": "NET2",  "puntos": "J7-2 / J9-5",  "puerto": 1, "bit": 1},
+    3:  {"nombre": "NET3",  "puntos": "J7-3 / J9-4",  "puerto": 1, "bit": 2},
+    4:  {"nombre": "NET4",  "puntos": "J7-4 / J9-3",  "puerto": 1, "bit": 3},
+    5:  {"nombre": "NET5",  "puntos": "J7-5 / J9-2",  "puerto": 1, "bit": 4},
+    6:  {"nombre": "NET6",  "puntos": "J7-6 / J9-1",  "puerto": 1, "bit": 5},
+    7:  {"nombre": "NET7",  "puntos": "J8-1 / J10-6", "puerto": 1, "bit": 6},
+    8:  {"nombre": "NET8",  "puntos": "J8-2 / J10-5", "puerto": 1, "bit": 7},
+    9:  {"nombre": "NET9",  "puntos": "J8-3 / J10-4", "puerto": 2, "bit": 0},
+    10: {"nombre": "NET10", "puntos": "J8-4 / J10-3", "puerto": 2, "bit": 1},
+    11: {"nombre": "NET11", "puntos": "J8-5 / J10-2", "puerto": 2, "bit": 2},
+    12: {"nombre": "NET12", "puntos": "J8-6 / J10-1", "puerto": 2, "bit": 3},
+}
+
+
+# ============================================================
+# PRUEBAS DE CONTINUIDAD
+# ============================================================
+
+PRUEBAS_CONTINUIDAD = [
+    {
+        "numero": 1,
+        "nombre": "Test_1",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J7-1 to J9-6",
+        "canal": 101,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 2,
+        "nombre": "Test_2",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J7-2 to J9-5",
+        "canal": 102,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 3,
+        "nombre": "Test_3",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J7-3 to J9-4",
+        "canal": 103,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 4,
+        "nombre": "Test_4",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J7-4 to J9-3",
+        "canal": 104,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 5,
+        "nombre": "Test_5",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J7-5 to J9-2",
+        "canal": 105,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 6,
+        "nombre": "Test_6",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J7-6 to J9-1",
+        "canal": 106,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 7,
+        "nombre": "Test_7",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J8-1 to J10-6",
+        "canal": 107,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 8,
+        "nombre": "Test_8",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J8-2 to J10-5",
+        "canal": 108,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 9,
+        "nombre": "Test_9",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J8-3 to J10-4",
+        "canal": 109,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 10,
+        "nombre": "Test_10",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J8-4 to J10-3",
+        "canal": 110,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 11,
+        "nombre": "Test_11",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J8-5 to J10-2",
+        "canal": 111,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+    {
+        "numero": 12,
+        "nombre": "Test_12",
+        "tipo": "CONTINUITY",
+        "descripcion": "Continuity J8-6 to J10-1",
+        "canal": 112,
+        "minimo": 0.0,
+        "maximo": 2.0,
+        "unidad": "Ω"
+    },
+]
