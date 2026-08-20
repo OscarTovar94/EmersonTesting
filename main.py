@@ -1474,6 +1474,14 @@ class VentanaPrincipal:
                 text_color="#D9A441"
             )
 
+            self.ventana.after(
+                50,
+                lambda indice=siguiente_indice:
+                self.mover_scroll_a_prueba(
+                    indice
+                )
+            )
+
         # =====================================================
         # FORZAR ACTUALIZACIÓN VISUAL
         # =====================================================
@@ -1856,6 +1864,44 @@ class VentanaPrincipal:
         self.label_fpy.configure(
             text=f"{fpy:.2f} %"
         )
+
+    def mover_scroll_a_prueba(self, indice):
+        """
+        Mantiene visible la prueba actualmente en proceso.
+        """
+
+        if not self.filas_pruebas:
+            return
+
+        try:
+            total_filas = len(
+                self.filas_pruebas
+            )
+
+            posicion = (
+                indice - 3
+            ) / max(
+                total_filas - 1,
+                1
+            )
+
+            posicion = max(
+                0.0,
+                min(
+                    posicion,
+                    1.0
+                )
+            )
+
+            self.frame_tabla._parent_canvas.yview_moveto(
+                posicion
+            )
+
+        except (
+            AttributeError,
+            tk.TclError
+        ):
+            pass
 
 
 def cargar_modulo_modelo(nombre_archivo):
