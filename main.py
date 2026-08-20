@@ -550,6 +550,46 @@ class VentanaPrincipal:
             "0.00 %",
             "#57A9FF"
         )
+        self.frame_encabezados_tabla = ctk.CTkFrame(
+            self.frame_contenido,
+            fg_color="#252842",
+            corner_radius=8
+        )
+
+        self.frame_encabezados_tabla.pack(
+            fill="x",
+            padx=20,
+            pady=(5, 0)
+        )
+        encabezados = [
+            "Prueba",
+            "Descripción",
+            "Canal",
+            "Límites",
+            "Valor",
+            "Estado"
+        ]
+
+        for columna, texto in enumerate(encabezados):
+
+            self.frame_encabezados_tabla.grid_columnconfigure(
+                columna,
+                weight=1
+            )
+
+            label = ctk.CTkLabel(
+                self.frame_encabezados_tabla,
+                text=texto,
+                font=("Arial", 14, "bold")
+            )
+
+            label.grid(
+                row=0,
+                column=columna,
+                padx=10,
+                pady=10,
+                sticky="ew"
+            )
 
         self.frame_tabla = ctk.CTkScrollableFrame(
             self.frame_contenido,
@@ -1013,6 +1053,11 @@ class VentanaPrincipal:
 
         self.prueba_en_proceso = True
 
+        self.ventana.after(
+            50,
+            self.regresar_tabla_al_inicio
+        )
+
         self.iniciar_cronometro_prueba()
 
         # Bloquear botón
@@ -1128,32 +1173,14 @@ class VentanaPrincipal:
 
         self.filas_pruebas = []
 
-        # Encabezados
-        encabezados = [
-            "Prueba",
-            "Descripción",
-            "Canal",
-            "Límites",
-            "Valor",
-            "Estado"
-        ]
-
-        for columna, texto in enumerate(encabezados):
-            label = ctk.CTkLabel(
-                self.frame_tabla,
-                text=texto,
-                font=("Arial", 14, "bold")
-            )
-            label.grid(
-                row=0,
-                column=columna,
-                padx=10,
-                pady=8,
-                sticky="ew"
+        for columna in range(6):
+            self.frame_tabla.grid_columnconfigure(
+                columna,
+                weight=1
             )
 
         # Crear una fila por cada prueba
-        for indice, prueba in enumerate(pruebas, start=1):
+        for indice, prueba in enumerate(pruebas, start=0):
 
             label_nombre = ctk.CTkLabel(
                 self.frame_tabla,
@@ -1895,6 +1922,22 @@ class VentanaPrincipal:
 
             self.frame_tabla._parent_canvas.yview_moveto(
                 posicion
+            )
+
+        except (
+            AttributeError,
+            tk.TclError
+        ):
+            pass
+
+    def regresar_tabla_al_inicio(self):
+        """
+        Regresa el scroll de pruebas a la primera fila.
+        """
+
+        try:
+            self.frame_tabla._parent_canvas.yview_moveto(
+                0.0
             )
 
         except (
