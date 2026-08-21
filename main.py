@@ -43,8 +43,8 @@ mutex = win32event.CreateMutex(
 if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
     sys.exit(0)
 
-
-ctk.set_appearance_mode("dark")
+#ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
 
@@ -133,7 +133,7 @@ class VentanaLogin:
             self.root,
             corner_radius=18,
             border_width=1,
-            border_color="#3A3D52"
+            border_color= ("#D0D5DD","#454B70")
         )
         self.frame_principal.pack(
             fill="both",
@@ -147,7 +147,7 @@ class VentanaLogin:
             self.frame_principal,
             text="EMERSON",
             font=("Arial", 34, "bold"),
-            text_color="#FFFFFF"
+            text_color=("#1F2937","#FFFFFF")
         )
         self.label_titulo.pack(
             pady=(35, 5)
@@ -157,7 +157,7 @@ class VentanaLogin:
             self.frame_principal,
             text="Sistema de pruebas funcionales y eléctricas",
             font=("Arial", 15),
-            text_color="#AEB4C8"
+            text_color=("#1F2937","#AEB4C8")
         )
         self.label_subtitulo.pack(
             pady=(0, 30)
@@ -249,7 +249,8 @@ class VentanaLogin:
             command=self.entrar,
             height=45,
             corner_radius=8,
-            font=("Arial", 16, "bold")
+            font=("Arial", 16, "bold"),
+            text_color=("#1F2937","#FFFFFF")
         )
         self.boton_entrar.pack(
             fill="x",
@@ -374,8 +375,9 @@ class VentanaPrincipal:
         )
 
         self.ventana.title("Emerson - Sistema de Pruebas")
-        self.ventana.geometry("1100x700")
-        self.ventana.minsize(900, 600)
+        self.ventana.state("zoomed")
+        self.ventana.geometry("1280x720")
+        #self.ventana.resizable(False,False)
 
         # Evita que la ventana quede detrás del Login
         self.ventana.lift()
@@ -395,10 +397,7 @@ class VentanaPrincipal:
         )
 
         # Maximiza la ventana después de abrirla
-        self.ventana.after(
-            100,
-            lambda: self.ventana.state("zoomed")
-        )
+        #self.ventana.after(100,lambda: self.ventana.state("zoomed"))
 
     def crear_interfaz(self):
         """Crea temporalmente la interfaz principal."""
@@ -487,13 +486,13 @@ class VentanaPrincipal:
             columna,
             titulo,
             valor,
-            color="#FFFFFF"
+            color=("#1F2937","#FFFFFF")
         ):
             frame = ctk.CTkFrame(
                 self.frame_indicadores,
-                corner_radius=10,
-                border_width=1,
-                border_color="#454B70"
+                corner_radius=14,
+                border_width=1
+                
             )
 
             frame.grid(
@@ -508,7 +507,7 @@ class VentanaPrincipal:
                 frame,
                 text=titulo,
                 font=("Arial", 13, "bold"),
-                text_color="#AEB4C8"
+                text_color=("#1F2937","#AEB4C8")
             ).pack(
                 pady=(8, 0)
             )
@@ -537,21 +536,21 @@ class VentanaPrincipal:
             1,
             "TOTAL",
             "0",
-            "#FFFFFF"
+            ("#1F2937","#FFFFFF")
         )
 
         self.label_piezas_pass = crear_tarjeta(
             2,
             "PASS",
             "0",
-            "#41C76F"
+            ("#006100", "#41C76F")
         )
 
         self.label_piezas_fail = crear_tarjeta(
             3,
             "FAIL",
             "0",
-            "#FF5C5C"
+            ("#9C0006","#FF5C5C")
         )
 
         self.label_fpy = crear_tarjeta(
@@ -567,9 +566,9 @@ class VentanaPrincipal:
 
         self.frame_id_pieza = ctk.CTkFrame(
             self.frame_contenido,
-            corner_radius=14,
+            corner_radius=8,
             border_width=1,
-            border_color="#454B70"
+            border_color=("#D0D5DD","#454B70")
         )
 
         self.frame_id_pieza.pack(
@@ -617,7 +616,7 @@ class VentanaPrincipal:
             text="ESPERANDO ID",
             width=180,
             font=("Arial", 15, "bold"),
-            text_color="#D9A441"
+            text_color=("#A85D00","#D9A441")
         )
 
         self.label_estado_id.grid(
@@ -631,7 +630,7 @@ class VentanaPrincipal:
             self.frame_id_pieza,
             text="Ingrese o escanee el ID de la pieza",
             font=("Arial", 16, "bold"),
-            text_color="white"
+            text_color=("#1F2937","#AEB4C8")
         )
 
         self.label_intrucciones.grid(
@@ -653,7 +652,7 @@ class VentanaPrincipal:
 
         self.frame_encabezados_tabla = ctk.CTkFrame(
             self.frame_contenido,
-            fg_color="#252842",
+            fg_color=("#FFFFFF","#252842"),
             corner_radius=8
         )
 
@@ -693,8 +692,8 @@ class VentanaPrincipal:
             )
 
         self.frame_tabla = ctk.CTkScrollableFrame(
-            self.frame_contenido,
-            label_text="Resultados de pruebas",
+            self.frame_contenido
+            #label_text="Resultados de pruebas",
             # fg_color="transparent"
         )
 
@@ -727,6 +726,7 @@ class VentanaPrincipal:
             width=240,
             height=50,
             font=("Arial", 17, "bold"),
+            text_color=("#1F2937","#AEB4C8"),
             state="disabled"
         )
 
@@ -789,6 +789,12 @@ class VentanaPrincipal:
         # CAMPO VACÍO
         # =====================================================
 
+        self.label_status.configure(
+            text=("En Espera"),
+            text_color="#002060",
+            bg_color="#A6C9EC"
+        )
+
         if not id_pieza:
 
             self.id_pieza_valido = False
@@ -796,7 +802,7 @@ class VentanaPrincipal:
 
             self.label_estado_id.configure(
                 text="ESPERANDO ID",
-                text_color="#D9A441"
+                text_color=("#A85D00","#D9A441")
             )
 
             self.boton_iniciar.configure(
@@ -816,7 +822,7 @@ class VentanaPrincipal:
 
             self.label_estado_id.configure(
                 text="ID INVÁLIDO",
-                text_color="#FF5C5C"
+                text_color=("#9C0006","#FF5C5C")
             )
 
             self.entry_id_pieza.delete(0, "end")
@@ -838,7 +844,7 @@ class VentanaPrincipal:
 
             self.label_estado_id.configure(
                 text=f"{len(id_pieza)}/16 DÍGITOS",
-                text_color="#D9A441"
+                text_color=("#A85D00","#D9A441")
             )
 
             self.entry_id_pieza.delete(0, "end")
@@ -860,7 +866,7 @@ class VentanaPrincipal:
 
             self.label_estado_id.configure(
                 text="ID INVÁLIDO",
-                text_color="#FF5C5C"
+                text_color=("#9C0006","#FF5C5C")
             )
 
             self.entry_id_pieza.delete(0, "end")
@@ -884,7 +890,7 @@ class VentanaPrincipal:
 
             self.label_estado_id.configure(
                 text="MODELO INCORRECTO",
-                text_color="#FF5C5C"
+                text_color=("#9C0006","#FF5C5C")
             )
 
             self.entry_id_pieza.delete(0, "end")
@@ -904,12 +910,12 @@ class VentanaPrincipal:
 
         self.label_estado_id.configure(
             text="ID VÁLIDO",
-            text_color="#41C76F"
+            text_color=("#006100","#41C76F")
         )
 
         self.label_intrucciones.configure(
             text="Presione el botón 'Iniciar prueba' para continuar",
-            text_color="#41C76F"
+            text_color=("#006100","#41C76F")
         )
 
         self.boton_iniciar.configure(
@@ -947,7 +953,7 @@ class VentanaPrincipal:
 
         self.label_intrucciones.configure(
             text="Prueba en proceso, espere a que finalice",
-            text_color="#D9A441"
+            text_color=("#A85D00","#D9A441")
         )
 
         self.iniciar_pruebas_resistencia()
@@ -984,7 +990,7 @@ class VentanaPrincipal:
 
             fila["estado"].configure(
                 text="PENDIENTE",
-                text_color="#D9A441"
+                text_color=("#A85D00","#D9A441")
             )
 
         if self.filas_pruebas:
@@ -993,7 +999,7 @@ class VentanaPrincipal:
                 0
             ]["estado"].configure(
                 text="PROCESANDO",
-                text_color="#D9A441"
+                text_color=("#A85D00","#D9A441")
             )
 
         self.label_status.configure(
@@ -1041,13 +1047,13 @@ class VentanaPrincipal:
             )
 
             if estado == "PASS":
-                color_estado = "#41C76F"
+                color_estado = ("#006100", "#41C76F")
 
             elif estado == "FAIL":
-                color_estado = "#FF5C5C"
+                color_estado = ("#9C0006","#FF5C5C")
 
             else:
-                color_estado = "#F2A541"
+                color_estado = ("#A85D00","#F2A541")
 
             label_estado.configure(
                 text=estado,
@@ -1164,7 +1170,7 @@ class VentanaPrincipal:
                 self.frame_tabla,
                 text="PENDIENTE",
                 font=("Arial", 13, "bold"),
-                text_color="#D9A441"
+                text_color=("#A85D00","#D9A441")
             )
             label_estado.grid(
                 row=indice,
@@ -1373,15 +1379,15 @@ class VentanaPrincipal:
 
         if estado == "PASS":
 
-            color_estado = "#41C76F"
+            color_estado = ("#006100", "#41C76F")
 
         elif estado == "FAIL":
 
-            color_estado = "#FF5C5C"
+            color_estado = ("#9C0006","#FF5C5C")
 
         else:
 
-            color_estado = "#F2A541"
+            color_estado = ("#A85D00","#F2A541")
 
         # =====================================================
         # ACTUALIZAR ESTADO
@@ -1408,7 +1414,7 @@ class VentanaPrincipal:
                 siguiente_indice
             ]["estado"].configure(
                 text="PROCESANDO",
-                text_color="#D9A441"
+                text_color=("#A85D00","#D9A441")
             )
 
             self.ventana.after(
@@ -1872,12 +1878,12 @@ class VentanaPrincipal:
 
         self.label_estado_id.configure(
             text="ESPERANDO ID",
-            text_color="#D9A441"
+            text_color=("#A85D00","#D9A441")
         )
 
         self.label_intrucciones.configure(
             text="Ingrese o escanee el ID de la pieza",
-            text_color="white"
+            text_color=("#1F2937","#AEB4C8")
         )
 
         self.boton_iniciar.configure(
