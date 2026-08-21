@@ -567,7 +567,7 @@ class VentanaPrincipal:
 
         self.frame_id_pieza = ctk.CTkFrame(
             self.frame_contenido,
-            corner_radius=10,
+            corner_radius=14,
             border_width=1,
             border_color="#454B70"
         )
@@ -627,6 +627,21 @@ class VentanaPrincipal:
             pady=12
         )
 
+        self.label_intrucciones = ctk.CTkLabel(
+            self.frame_id_pieza,
+            text="Ingrese o escanee el ID de la pieza",
+            font=("Arial", 16, "bold"),
+            text_color="white"
+        )
+
+        self.label_intrucciones.grid(
+            row=1,
+            column=0,
+            columnspan=3,
+            padx=20,
+            pady=(0, 5)
+        )
+
         self.entry_id_pieza.bind(
             "<Return>",
             self.validar_id_pieza_inline
@@ -645,7 +660,7 @@ class VentanaPrincipal:
         self.frame_encabezados_tabla.pack(
             fill="x",
             padx=20,
-            pady=(5, 0)
+            pady=0
         )
         encabezados = [
             "Prueba",
@@ -804,6 +819,8 @@ class VentanaPrincipal:
                 text_color="#FF5C5C"
             )
 
+            self.entry_id_pieza.delete(0, "end")
+
             self.boton_iniciar.configure(
                 state="disabled"
             )
@@ -824,6 +841,8 @@ class VentanaPrincipal:
                 text_color="#D9A441"
             )
 
+            self.entry_id_pieza.delete(0, "end")
+
             self.boton_iniciar.configure(
                 state="disabled"
             )
@@ -843,6 +862,8 @@ class VentanaPrincipal:
                 text="ID INVÁLIDO",
                 text_color="#FF5C5C"
             )
+
+            self.entry_id_pieza.delete(0, "end")
 
             self.boton_iniciar.configure(
                 state="disabled"
@@ -866,6 +887,8 @@ class VentanaPrincipal:
                 text_color="#FF5C5C"
             )
 
+            self.entry_id_pieza.delete(0, "end")
+
             self.boton_iniciar.configure(
                 state="disabled"
             )
@@ -881,6 +904,11 @@ class VentanaPrincipal:
 
         self.label_estado_id.configure(
             text="ID VÁLIDO",
+            text_color="#41C76F"
+        )
+
+        self.label_intrucciones.configure(
+            text="Presione el botón 'Iniciar prueba' para continuar",
             text_color="#41C76F"
         )
 
@@ -915,6 +943,11 @@ class VentanaPrincipal:
 
         self.boton_iniciar.configure(
             state="disabled"
+        )
+
+        self.label_intrucciones.configure(
+            text="Prueba en proceso, espere a que finalice",
+            text_color="#D9A441"
         )
 
         self.iniciar_pruebas_resistencia()
@@ -1782,7 +1815,7 @@ class VentanaPrincipal:
             )
 
             posicion = (
-                indice - 3
+                indice - 6
             ) / max(
                 total_filas - 1,
                 1
@@ -1840,6 +1873,11 @@ class VentanaPrincipal:
         self.label_estado_id.configure(
             text="ESPERANDO ID",
             text_color="#D9A441"
+        )
+
+        self.label_intrucciones.configure(
+            text="Ingrese o escanee el ID de la pieza",
+            text_color="white"
         )
 
         self.boton_iniciar.configure(
