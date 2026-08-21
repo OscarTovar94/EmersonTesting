@@ -58,7 +58,7 @@ SALIDA_ACTIVA_EN_1 = False
 # NET1  = J7-1 / J9-6
 # NET2  = J7-2 / J9-5
 # ...
-# 
+#
 # NET1 a NET8  -> puerto 1, bits 0 a 7
 # NET9 a NET12 -> puerto 2, bits 0 a 3
 # ============================================================
